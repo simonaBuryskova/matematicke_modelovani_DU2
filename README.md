@@ -1,2 +1,2 @@
 # DU2
-DÚ2: Buryšková, Hrubeš, Vaněk
+DÚ2: Buryšková, Hrubeš, Vaněk, Benda
