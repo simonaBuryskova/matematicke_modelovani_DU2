@@ -42,26 +42,26 @@ TIntegralExplicit = 4*Sqrt[l/g]Integrate[1/Sqrt[1-k^2*Sin[\[CurlyPhi]]^2], {\[Cu
 
 g = 9.81;
 l = 1;
-\[Theta]init = 10/(2\[Pi]);
+konst\[Theta]init = 10/(2\[Pi]);    (*Tady se dosazovalo do glob\[AAcute]ln\[IAcute] prom\[EHacek]nn\[EAcute], dle kter\[EAcute] se neho\[RHacek]e rozv\[IAcute]j\[IAcute] a pak to d\[EHacek]lalo blbosti, je lep\[SHacek]\[IAcute] to pojmenovat jinak*)
 \[Omega]init = 0;
-Sol = Reap[ (* "Reap" posb\[IAcute]r\[AAcute] hodnoty z\[IAcute]skan\[EAcute] v "Sow" *)
-	NDSolve[ (* \[CapitalRHacek]e\[SHacek]en\[IAcute] ODR *)
-		{
-			\[Theta]''[t] + g/l * Sin[\[Theta][t]] == 0,
-			\[Theta][0] == \[Theta]init,
-			\[Theta]'[0] == \[Omega]init
-		},
-		\[Theta][t],
-		{t, 0, 4\[Pi]},
-		Method->{
-			"EventLocator", 
-			"Event"-> \[Theta][t],
-			"EventAction" :> Sow[t]
-		}
-	]
-];
-NumSol = Sol[[1]]
-ZeroPoints = Sol[[2]]
+sol = Reap[ (* "Reap" posb\[IAcute]r\[AAcute] hodnoty z\[IAcute]skan\[EAcute] v "Sow" *)(*Poj\[DHacek]me na\[SHacek]e nov\[EAcute] funkce zna\[CHacek]it s mal\[YAcute]mi p\[IAcute]smeny*)
+			NDSolve[ (* \[CapitalRHacek]e\[SHacek]en\[IAcute] ODR *)
+					{
+							\[Theta]''[t] + g/l * Sin[\[Theta][t]] == 0,
+							\[Theta][0] == konst\[Theta]init,
+							\[Theta]'[0] == \[Omega]init
+					},
+							\[Theta][t],
+							{t, 0, 4\[Pi]},
+						Method->{
+								"EventLocator", 
+								"Event"-> \[Theta][t],
+								"EventAction" :> Sow[t]
+								}
+					]
+		];
+NumSol = sol[[1]]
+ZeroPoints = sol[[2]]
 
 
 Plot[Evaluate[\[Theta][t] /. NumSol],{t,0,4\[Pi]}]
@@ -69,8 +69,11 @@ Plot[Evaluate[\[Theta][t] /. NumSol],{t,0,4\[Pi]}]
 
 (* Vzdalenosti mezi nulovymi body jsou vsude stejne! *)
 DifsZeroPoints = Differences[ZeroPoints[[1]]]
-(* Vzdalenosti odpovidaji ctvrtine periody *)
-TNumSol = 4*Mean[DifsZeroPoints]
+(* Vzdalenosti odpovidaji ctvrtine periody *)(*Polovin\[EHacek] ne? To pak vyjde i stejn\[AAcute] hodnota*)
+TNumSol = 2*Mean[DifsZeroPoints]
+
+
+
 
 
 
