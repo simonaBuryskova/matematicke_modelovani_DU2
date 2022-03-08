@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Kvadratick\[YAcute] \[CHacek]len rozvoje*)
 
 
@@ -59,7 +59,7 @@ sol = Reap[ (* "Reap" posb\[IAcute]r\[AAcute] hodnoty z\[IAcute]skan\[EAcute] v 
 					},
 							\[Theta][t],
 							{t, 0, 4\[Pi]},
-						Method->{
+						Method-> {
 								"EventLocator", 
 								"Event"-> \[Theta][t],
 								"EventAction" :> Sow[t]
@@ -83,6 +83,55 @@ TNumSol = 2*Mean[DifsZeroPoints]
 
 
 
+
+
+
+
+
+(* ::Section:: *)
+(*Numericky - jin\[EAcute] metody (\[UAcute]kol 3)*)
+
+
+(*pouzijeme metodu LinearlyImplicitEuler*)
+solLinearlyEuler:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[Theta][0] == konst\[Theta]init, \[Theta]'[0] == \[Omega]init}, \[Theta][t], {t, 0, 4\[Pi]}, 
+							StartingStepSize->1.1895988355758171/100, 
+							Method->{"TimeIntegration"->"LinearlyImplicitEuler"},  
+							StepMonitor:>If[printResults, Print["Step number [", nSteps++,"]: \[Theta][t] = ",\[Theta][t],", t =",t], {}]]
+nSteps = 1; 
+printResults = False; 
+
+
+solLinearlyEuler
+Plot[{Evaluate[\[Theta][t] /. solLinearlyEuler],  Evaluate[\[Theta][t] /. NumSol], 10/(2*Pi), -10/(2*Pi)}, {t, 0, 4\[Pi]},
+	  PlotLegends->{"solLinearlyEuler, LinearlyImplicitEuler", "NumSol, Default settings"}]
+
+
+(*pouzijeme metodu ImplicitRungeKutta -> vyjde stejne jako metoda whenEvent*)
+solImpRungeKutta:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[Theta][0] == konst\[Theta]init, \[Theta]'[0] == \[Omega]init}, \[Theta][t], {t, 0, 4\[Pi]}, 
+							StartingStepSize->1/100,
+							Method->"ImplicitRungeKutta",  
+							StepMonitor:>If[printResults, Print["Step number [", nSteps++,"]: \[Theta][t] = ",\[Theta][t],", t =",t], {}]]
+nSteps = 1; 
+
+
+printResults = False; 
+solImpRungeKutta
+Plot[{Evaluate[\[Theta][t] /. solImpRungeKutta] ,  Evaluate[\[Theta][t] /. NumSol], 10/(2*Pi), -10/(2*Pi)}, {t, 0, 4\[Pi]},
+	  PlotLegends->{"ImpRungeKutta", "NumSol, Default settings"}]
+
+
+(*pouzijeme metodu ExplicitEuler*)
+solExpEuler:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[Theta][0] == konst\[Theta]init, \[Theta]'[0] == \[Omega]init}, \[Theta][t], {t, 0, 4\[Pi]}, 
+							StartingStepSize->2*\[Pi]/1000, 
+							Method->{"TimeIntegration"->"ExplicitEuler"},  
+							StepMonitor:>If[printResults, Print["Step number [", nSteps++,"]: \[Theta][t] = ",\[Theta][t],", t =",t], {}]]
+nSteps = 1; 
+
+
+printResults = False
+solExpEuler 
+Plot[{Evaluate[\[Theta][t] /. solExpEuler],  Evaluate[\[Theta][t] /. NumSol], 10/(2*Pi), -10/(2*Pi)}, {t, 0, 4\[Pi]},
+	  PlotLegends->{"solExpEuler, ExplicitEuler", "NumSol, Default settings"}]
 
 
 
