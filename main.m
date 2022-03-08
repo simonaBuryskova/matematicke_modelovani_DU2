@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Kvadratick\[YAcute] \[CHacek]len rozvoje*)
 
 
@@ -49,13 +49,13 @@ TIntegralExplicit /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1
 konstg = 9.81;
 konstl = 1;
 konst\[Theta]init = 10/(2\[Pi]);    (*Tady se dosazovalo do glob\[AAcute]ln\[IAcute] prom\[EHacek]nn\[EAcute], dle kter\[EAcute] se neho\[RHacek]e rozv\[IAcute]j\[IAcute] a pak to d\[EHacek]lalo blbosti, je lep\[SHacek]\[IAcute] to pojmenovat jinak*)
-\[Omega]init = 0;
+konst\[Omega]init = 0;
 sol = Reap[ (* "Reap" posb\[IAcute]r\[AAcute] hodnoty z\[IAcute]skan\[EAcute] v "Sow" *)(*Poj\[DHacek]me na\[SHacek]e nov\[EAcute] funkce zna\[CHacek]it s mal\[YAcute]mi p\[IAcute]smeny*)
 			NDSolve[ (* \[CapitalRHacek]e\[SHacek]en\[IAcute] ODR *)
 					{
 							\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0,
 							\[Theta][0] == konst\[Theta]init,
-							\[Theta]'[0] == \[Omega]init
+							\[Theta]'[0] == konst\[Omega]init
 					},
 							\[Theta][t],
 							{t, 0, 4\[Pi]},
@@ -93,7 +93,7 @@ TNumSol = 2*Mean[DifsZeroPoints]
 
 
 (*pouzijeme metodu LinearlyImplicitEuler*)
-solLinearlyEuler:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[Theta][0] == konst\[Theta]init, \[Theta]'[0] == \[Omega]init}, \[Theta][t], {t, 0, 4\[Pi]}, 
+solLinearlyEuler:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[Theta][0] == konst\[Theta]init, \[Theta]'[0] == konst\[Omega]init}, \[Theta][t], {t, 0, 4\[Pi]}, 
 							StartingStepSize->1.1895988355758171/100, 
 							Method->{"TimeIntegration"->"LinearlyImplicitEuler"},  
 							StepMonitor:>If[printResults, Print["Step number [", nSteps++,"]: \[Theta][t] = ",\[Theta][t],", t =",t], {}]]
@@ -107,7 +107,7 @@ Plot[{Evaluate[\[Theta][t] /. solLinearlyEuler],  Evaluate[\[Theta][t] /. NumSol
 
 
 (*pouzijeme metodu ImplicitRungeKutta -> vyjde stejne jako metoda whenEvent*)
-solImpRungeKutta:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[Theta][0] == konst\[Theta]init, \[Theta]'[0] == \[Omega]init}, \[Theta][t], {t, 0, 4\[Pi]}, 
+solImpRungeKutta:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[Theta][0] == konst\[Theta]init, \[Theta]'[0] == konst\[Omega]init}, \[Theta][t], {t, 0, 4\[Pi]}, 
 							StartingStepSize->1/100,
 							Method->"ImplicitRungeKutta",  
 							StepMonitor:>If[printResults, Print["Step number [", nSteps++,"]: \[Theta][t] = ",\[Theta][t],", t =",t], {}]]
@@ -121,7 +121,7 @@ Plot[{Evaluate[\[Theta][t] /. solImpRungeKutta] ,  Evaluate[\[Theta][t] /. NumSo
 
 
 (*pouzijeme metodu ExplicitEuler*)
-solExpEuler:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[Theta][0] == konst\[Theta]init, \[Theta]'[0] == \[Omega]init}, \[Theta][t], {t, 0, 4\[Pi]}, 
+solExpEuler:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[Theta][0] == konst\[Theta]init, \[Theta]'[0] == konst\[Omega]init}, \[Theta][t], {t, 0, 4\[Pi]}, 
 							StartingStepSize->2*\[Pi]/1000, 
 							Method->{"TimeIntegration"->"ExplicitEuler"},  
 							StepMonitor:>If[printResults, Print["Step number [", nSteps++,"]: \[Theta][t] = ",\[Theta][t],", t =",t], {}]]
@@ -132,6 +132,27 @@ printResults = False
 solExpEuler 
 Plot[{Evaluate[\[Theta][t] /. solExpEuler],  Evaluate[\[Theta][t] /. NumSol], 10/(2*Pi), -10/(2*Pi)}, {t, 0, 4\[Pi]},
 	  PlotLegends->{"solExpEuler, ExplicitEuler", "NumSol, Default settings"}]
+
+
+
+
+
+(* ::Section:: *)
+(*Porovn\[AAcute]n\[IAcute] analytick\[EAcute] aproximace a numerick\[EAcute]ho \[RHacek]e\[SHacek]en\[IAcute] (\[UAcute]kol 5)*)
+
+
+\[Omega]nula=Sqrt[konstg/konstl];
+\[Omega]=Sqrt[\[Omega]nula^2/(1+((konst\[Theta]init^2)/8))];
+solPoincareLindstedt=konst\[Theta]init*Cos[\[Omega]*t]+konst\[Theta]init^3/192*(Cos[3*\[Omega]*t]-Cos[\[Omega]*t]);
+
+
+Plot[{solPoincareLindstedt,Evaluate[\[Theta][t] /. NumSol]},{t,0,4\[Pi]}]
+
+
+TseriesAprox /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1   (*Analytick\[AAcute] aproximace*)
+TIntegralExplicit /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1 (*P\[RHacek]es eliptick\[YAcute] integr\[AAcute]l*)
+TNumSol (*Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute]*)
+TPoincareLindstedt=2\[Pi]/\[Omega]  (*Aproximace Poincar\[EAcute]-Lindstedt*)
 
 
 
