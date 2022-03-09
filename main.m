@@ -5,8 +5,8 @@
 
 
 (* ::Input:: *)
-(*parametry = {g , l , \[Theta]init, \[Omega]init };*)
-(*k = Sin[\[Theta]init/2];*)
+(*parametry = {g, l, \[Theta]init, \[Omega]init};*)
+(*k = Sin[\[Theta]init / 2];*)
 
 
 (* ::Input:: *)
@@ -79,15 +79,6 @@ DifsZeroPoints = Differences[ZeroPoints[[1]]]
 TNumSol = 2*Mean[DifsZeroPoints]
 
 
-
-
-
-
-
-
-
-
-
 (* ::Section:: *)
 (*Numericky - jin\[EAcute] metody (\[UAcute]kol 3)*)
 
@@ -142,8 +133,8 @@ Plot[{Evaluate[\[Theta][t] /. solExpEuler],  Evaluate[\[Theta][t] /. NumSol], 10
 
 
 \[Omega]nula=Sqrt[konstg/konstl];
-\[Omega]=Sqrt[\[Omega]nula^2/(1+((konst\[Theta]init^2)/8))];
-solPoincareLindstedt=konst\[Theta]init*Cos[\[Omega]*t]+konst\[Theta]init^3/192*(Cos[3*\[Omega]*t]-Cos[\[Omega]*t]);
+\[Omega]PL = Sqrt[\[Omega]nula^2/(1+((konst\[Theta]init^2)/8))];
+solPoincareLindstedt=konst\[Theta]init*Cos[\[Omega]PL*t]+konst\[Theta]init^3/192*(Cos[3*\[Omega]PL*t]-Cos[\[Omega]PL*t]);
 
 
 Plot[{solPoincareLindstedt,Evaluate[\[Theta][t] /. NumSol]},{t,0,4\[Pi]}]
@@ -152,7 +143,93 @@ Plot[{solPoincareLindstedt,Evaluate[\[Theta][t] /. NumSol]},{t,0,4\[Pi]}]
 TseriesAprox /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1   (*Analytick\[AAcute] aproximace*)
 TIntegralExplicit /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1 (*P\[RHacek]es eliptick\[YAcute] integr\[AAcute]l*)
 TNumSol (*Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute]*)
-TPoincareLindstedt=2\[Pi]/\[Omega]  (*Aproximace Poincar\[EAcute]-Lindstedt*)
+TPoincareLindstedt=2\[Pi]/\[Omega]PL  (*Aproximace Poincar\[EAcute]-Lindstedt*)
+
+
+(* ::Section:: *)
+(*Dal\[SHacek]\[IAcute] \[CHacek]len v rozvoji (\[UAcute]kol 6)*)
+
+
+\[Theta]series[t_] := \[Epsilon]*\[Theta]A[t] + \[Epsilon]^3*\[Theta]B[t] + \[Epsilon]^5*\[Theta]C[t] (* Potrebujeme nejvyssi clen eps^5 *)
+\[Omega]02 = \[Omega]2 - \[Epsilon]^2 * \[Alpha] - \[Epsilon]^4*\[Beta] (* eps^6 uz nepotrebujeme a bereme to rovnou s minusem*)
+sinSeries = Normal[Series[Sin[\[Theta]],{\[Theta],0,5}]] /. \[Theta] -> \[Theta]series[t] (* Normal tu je z nejakych obskurnich duvodu ze mocniny nemuzou byt variable *)
+
+
+\[Theta]series''[t] + \[Omega]02 * sinSeries
+
+
+koef = CoefficientList[ExpandAll[\[Theta]series''[t] + \[Omega]02 * sinSeries],\[Epsilon]]; (* Indexovani je o 1 posunute, protoze prvni odpovida nulte mocnine *)
+koef[[2]] == 0 // TraditionalForm
+koef[[4]] == 0 // TraditionalForm
+koef[[6]] == 0 // TraditionalForm
+
+
+(* Zbab\[EHacek]le dosad\[IAcute]me \[RHacek]e\[SHacek]en\[IAcute] z dokumentu *)
+rceProThetaC = koef[[6]] \
+	/. \[Theta]A[t] -> \[Theta]tI * Cos[Sqrt[\[Omega]2]*t] \
+	/. \[Theta]B[t] -> \[Theta]tI^3 / 192 * { Cos[3*Sqrt[\[Omega]2]*t] - Cos[Sqrt[\[Omega]2]*t] } \
+	/. \[Alpha] -> - \[Omega]2 * \[Theta]tI^2 / 8 ;
+rceProThetaC // Simplify // TraditionalForm
+
+
+thetaCsol = DSolve[
+{
+	rceProThetaC[[1]] == 0,
+	\[Theta]C[0] == 0, (* Pocatecni podminka *)
+	\[Theta]C'[0] == 0
+},\[Theta]C[t],t] // Simplify // TraditionalForm
+
+
+(* Vid\[IAcute]me, \[ZHacek]e se tu vyskytuje op\[EHacek]t diverguj\[IAcute]c\[IAcute] \[CHacek]len  *)
+90 t (512 \[Beta]+5 \[Theta]tI^4 \[Omega]2) // TraditionalForm
+(* Situaci op\[EHacek]t zachr\[AAcute]n\[IAcute]me polo\[ZHacek]en\[IAcute]m z\[AAcute]vorky rovn\[EAcute] nule a \[RHacek]e\[SHacek]en\[IAcute] je *)
+Style[\[Beta] == -(5/512)HoldForm[\!\(TraditionalForm\`\*
+SubsuperscriptBox[
+OverscriptBox["\[Theta]", "~"], 
+StyleBox[
+RowBox[{"i", "n", "i", "t"}], "TI"], "4"] 
+\*SuperscriptBox[\(\[Omega]\), \(2\)]\)] ,FontSize->30]// TraditionalForm
+
+
+(* Finalni reseni *)
+thetaCsol /. \[Beta] -> -5/512 *\[Theta]tI^4 *\[Omega]2 /. Sqrt[\[Omega]2] -> \[Omega] /. 1/Sqrt[\[Omega]2] -> 1/\[Omega] /. \[Theta]tI -> HoldForm[\!\(TraditionalForm\`SubscriptBox[OverscriptBox["\<\[Theta]\>", "\<~\>"], StyleBox[RowBox[{"\<i\>", "\<n\>", "\<i\>", "\<t\>"}], "\<TI\>"]]\)]
+
+
+(* ::Section:: *)
+(*Marn\[EAcute] pokusy o \[RHacek]e\[SHacek]en\[IAcute] 6. \[UAcute]kolu p\[RHacek]es mathematicu*)
+
+
+sol61 = DSolve[{koef[[2]]==0,
+	\[Theta]A[0] == \[Theta]tI, (* Pocatecni podminka *)
+	\[Theta]A'[0] == 0
+},\[Theta]A,t]
+
+
+\[Theta]A /. sol61
+
+
+f[1]
 
 
 
+DSolve[{koef[[4]]==0,
+	\[Theta]A[t] == \[Theta]A /. sol61,
+	\[Theta]B[0] == 0, (* Pocatecni podminka *)
+	\[Theta]B'[0] == 0
+},
+\[Theta]B[t],t]
+
+
+sol = DSolve[
+{
+	koef[[2]] == 0,
+	koef[[4]] == 0,
+	\[Theta]A[0] == \[Theta]tI, (* Pocatecni podminka *)
+	\[Theta]A'[0] == 0,
+	\[Theta]B[0] == 0, (* Pocatecni podminka *)
+	\[Theta]B'[0] == 0
+},
+{\[Theta]A[t],\[Theta]B[t]},t]
+
+
+\[Theta]B[t] /. sol /. \[Alpha] -> - \[Omega]2*\[Theta]tI^2 /8
