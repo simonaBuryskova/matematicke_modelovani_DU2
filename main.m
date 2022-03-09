@@ -129,6 +129,89 @@ Plot[{Evaluate[\[Theta][t] /. solExpEuler],  Evaluate[\[Theta][t] /. NumSol], 10
 
 
 (* ::Section:: *)
+(*Z\[AAcute]kon zachov\[AAcute]n\[IAcute] energie a numerick\[EAcute] metody (\[UAcute]kol 4)*)
+
+
+(*ClearAll["Global'*"]*)
+h=0.01;
+tMax = 100;
+mtd ="ExplicitEuler";
+\[Omega]0 = 1.7;
+
+(*Metoda navr\[ZHacek]en\[AAcute] Mathematicou*)
+goodSolution = NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][t],\[Omega][0]==\[Omega]0,\[Theta][0]==0 },{\[Theta][t], \[Omega][t]},{t,0,tMax}];
+goodPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. goodSolution], {t, 0 ,tMax}, PlotStyle->{Blue,Dashed}];
+(*Vl\[AAcute]stn\[IAcute] volba metody*)
+badSolution =NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][t],\[Omega][0]==\[Omega]0,\[Theta][0]==0 },{\[Theta][t], \[Omega][t]},{t,0,tMax},StartingStepSize->h,Method->{"TimeIntegration"->mtd}];
+badPlot =ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. badSolution], {t, 0 ,tMax}, PlotStyle->Red];
+(*Porovn\[AAcute]n\[IAcute] v\[YAcute]voje energie*)
+goodEnergyPlot = Plot[Evaluate[0.5*\[Omega][t]^2-Cos[\[Theta][t]]]/. goodSolution, {t, 0 ,tMax},PlotStyle->{Blue,Dashed}, PlotRange-> {{0,tMax},{0,1}}];
+badEnergyPlot =Plot[Evaluate[0.5*\[Omega][t]^2-Cos[\[Theta][t]]]/. badSolution, {t, 0 ,tMax}, PlotStyle->Red, PlotRange-> {{0,tMax},{0.5*\[Omega]0^2-1-0.5,0.5*\[Omega]0^2-1+0.5}}];
+
+GraphicsRow[{Show[{badEnergyPlot,goodEnergyPlot},PlotLabel->"Celkov\[AAcute] energie syst\[EAcute]mu",AxesLabel->{t,"E"}],Show[{badPlot,goodPlot},PlotLabel->"F\[AAcute]zov\[YAcute] prostor",AxesLabel->{\[Theta],\[Omega]}]}]
+
+
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+h=0.5;
+tMax = 100;
+mtd ="ExplicitEuler";
+\[Omega]0 = 1.7;
+(*Pokus napravit chybu pomoc\[IAcute] projekce*)
+goodSolution = NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][t],\[Omega][0]==\[Omega]0,\[Theta][0]==0 },{\[Theta][t], \[Omega][t]},{t,0,tMax}];
+projSolution =NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][t],\[Omega][0]==\[Omega]0,\[Theta][0]==0 },{\[Theta][t], \[Omega][t]},{t,0,tMax},StartingStepSize->h,
+						Method->{"Projection",Method->mtd, "Invariants"->{0.5*\[Omega][t]^2-Cos[\[Theta][t]]}}];
+(*Porovn\[AAcute]n\[IAcute] v\[YAcute]voj\[URing] v \[CHacek]ase*)					
+projPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. projSolution], {t, 0 ,tMax}, PlotStyle->{Darker[Green],Dashed},PlotLabel->"F\[AAcute]zov\[YAcute] prostor s projek\[CHacek]n\[IAcute] metodou",AxesLabel->{\[Theta],\[Omega]}];
+goodPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. goodSolution], {t, 0 ,tMax}, PlotStyle->{Blue,Dashed}];
+goodTimePlot= Plot[Evaluate[{\[Theta][t]} /. goodSolution], {t, 0 ,tMax}, PlotStyle->{Blue},PlotLabel->"V\[YAcute]chylka kyvadla v \[CHacek]ase",AxesLabel->{t,TraditionalForm[HoldForm[\[Theta][t]]]}];
+projTimePlot= Plot[Evaluate[{\[Theta][t]} /. projSolution], {t, 0 ,tMax}, PlotStyle->{Darker[Green]}];
+
+phasePlot = Show[{projPlot,goodPlot}];
+thetaPlot =Show[{goodTimePlot,projTimePlot}];
+GraphicsRow[{projPlot,thetaPlot}]
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+h=0.01;
+
+SPRKSolution = NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][t],\[Omega][0]==\[Omega]0,\[Theta][0]==0 },{\[Theta][t], \[Omega][t]},{t,0,tMax}, 
+					Method -> {"SymplecticPartitionedRungeKutta", "DifferenceOrder" -> 8,"PositionVariables" -> {\[Theta][t]}},  StartingStepSize -> h];
+SPRKPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. SPRKSolution], {t, 0 ,tMax}, PlotStyle->{Brown,Dashed}]
+
+SPRKTimePlot= Plot[Evaluate[{\[Theta][t]} /. projSolution], {t, 0 ,tMax}, PlotStyle->{Brown}];
+Show[{goodTimePlot,SPRKTimePlot}]
+     
+
+
+(* ::Section:: *)
 (*Porovn\[AAcute]n\[IAcute] analytick\[EAcute] aproximace a numerick\[EAcute]ho \[RHacek]e\[SHacek]en\[IAcute] (\[UAcute]kol 5)*)
 
 
