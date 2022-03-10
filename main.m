@@ -57,7 +57,7 @@ TIntegralExplicit = 4*Sqrt[l/g]Integrate[1/Sqrt[1-k^2*Sin[\[CurlyPhi]]^2], {\[Cu
 TIntegralExplicit /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*2 Perioda numericky*)
 
 
@@ -260,7 +260,7 @@ PlotStyle->{Red,Blue, {Black, Dotted},{Black,Dotted}}, PlotLabel->"Numerick\[EAc
 PlotLegends->{MaTeX /@ solPoincareLindstedt,  MaTeX["\\text{Numerick\[EAcute] \[RHacek].,default}"],MaTeX["\\theta_{max}"]   }]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*6.1 Dal\[SHacek]\[IAcute] \[CHacek]len v rozvoji*)
 
 
@@ -306,7 +306,11 @@ RowBox[{"i", "n", "i", "t"}], "TI"], "4"]
 
 
 (* Finalni reseni *)
-thetaCsol /. \[Beta] -> -5/512 *\[Theta]tI^4 *\[Omega]2 /. Sqrt[\[Omega]2] -> \[Omega] /. 1/Sqrt[\[Omega]2] -> 1/\[Omega] /. \[Theta]tI -> HoldForm[\!\(TraditionalForm\`SubscriptBox[OverscriptBox["\<\[Theta]\>", "\<~\>"], StyleBox[RowBox[{"\<i\>", "\<n\>", "\<i\>", "\<t\>"}], "\<TI\>"]]\)]
+thetaCsol /. \[Beta] -> -5/512 *\[Theta]tI^4 *\[Omega]2 /. Sqrt[\[Omega]2] -> \[Omega] /. 1/Sqrt[\[Omega]2] -> 1/\[Omega] 
+
+
+TPLctvrtyRad = 2*\[Pi]*Sqrt[l/g] * ( 1 + \[Theta]^2/16 + 3/1024*\[Theta]^4 ) // TraditionalForm
+TPLctvrtyRad /. l -> 1 /. g->9.81 /. \[Theta]->10/(2\[Pi])
 
 
 (* ::Section::Closed:: *)
@@ -347,6 +351,14 @@ sol = DSolve[
 
 
 \[Theta]B[t] /. sol /. \[Alpha] -> - \[Omega]2*\[Theta]tI^2 /8
+
+
+\[Omega]PL4 = Sqrt[ g/l /(1+\[Theta]^2/16 + 5/512*\[Theta]^4 )]
+Sqrt[g/(l (1+\[Theta]^2/16+(5 \[Theta]^4)/512))]
+TPL4radDleMathematicy = Simplify[Series[2\[Pi]/\[Omega]PL4,{\[Theta],0,5}]]
+Normal[TPL4radDleMathematicy] /. l -> 1 /. g->9.81 /. \[Theta]->10/(2\[Pi])
+SeriesData[\[Theta], 0, {2 (g/l)^Rational[-1, 2] Pi, 0, Rational[1, 16] (g/l)^Rational[-1, 2] Pi, 0, Rational[9, 1024] (g/l)^Rational[-1, 2] Pi}, 0, 6, 1]
+2.221425034572327`
 
 
 (* ::Section::Closed:: *)
