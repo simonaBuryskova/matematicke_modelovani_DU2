@@ -1,7 +1,22 @@
 (* ::Package:: *)
 
-(* ::Section:: *)
-(*Kvadratick\[YAcute] \[CHacek]len rozvoje*)
+(* ::Section::Closed:: *)
+(*Kyvadlo*)
+(*team Pendulum: Benda, Bury\[SHacek]kov\[AAcute], Hrube\[SHacek], Van\[EHacek]k*)
+
+
+ClearAll[]
+(*nacteme si balik MaTeX*)
+ResourceFunction["MaTeXInstall"][] 
+<<MaTeX`
+
+
+(*font jako v LaTeXu*)
+styleLaTeX = Directive[FontFamily->"Latin Modern Roman 10",FontSize->10, FontColor->Black];
+
+
+(* ::Section::Closed:: *)
+(*1 Dal\[SHacek]\[IAcute] \[CHacek]len rozvoje*)
 
 
 (* ::Input:: *)
@@ -17,7 +32,7 @@
 (* ::Input:: *)
 (*(* Tayloruv rozvoj integrandu *)*)
 (*Integrand = 1/Sqrt[1-k^2*Sin[\[CurlyPhi]]^2];*)
-(*seriesIntegrand = Series[Integrand, {\[Theta]init, 0,4}]   (*Dle toho \[UAcute]kolu m\[AAcute]me rov\[IAcute]jet do jednoho \[RHacek]\[AAcute]du nav\[IAcute]c.*)*)
+(*seriesIntegrand = Series[Integrand, {\[Theta]init, 0,4}]  *)
 
 
 (* ::Input:: *)
@@ -25,7 +40,7 @@
 
 
 (* ::Input:: *)
-(*TseriesAprox = 4*Sqrt[l/g]*Integrate[seriesIntegrand, {\[CurlyPhi], 0, \[Pi]/2}]*)
+(*TseriesAprox = 4*Sqrt[l/g]*Integrate[seriesIntegrand, {\[CurlyPhi], 0, \[Pi]/2}];*)
 
 
 TseriesAprox /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1
@@ -42,15 +57,15 @@ TIntegralExplicit = 4*Sqrt[l/g]Integrate[1/Sqrt[1-k^2*Sin[\[CurlyPhi]]^2], {\[Cu
 TIntegralExplicit /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1
 
 
-(* ::Section:: *)
-(*Numericky*)
+(* ::Section::Closed:: *)
+(*2 Perioda numericky*)
 
 
 konstg = 9.81;
 konstl = 1;
-konst\[Theta]init = 10/(2\[Pi]);    (*Tady se dosazovalo do glob\[AAcute]ln\[IAcute] prom\[EHacek]nn\[EAcute], dle kter\[EAcute] se neho\[RHacek]e rozv\[IAcute]j\[IAcute] a pak to d\[EHacek]lalo blbosti, je lep\[SHacek]\[IAcute] to pojmenovat jinak*)
+konst\[Theta]init = 10/(2\[Pi]); 
 konst\[Omega]init = 0;
-sol = Reap[ (* "Reap" posb\[IAcute]r\[AAcute] hodnoty z\[IAcute]skan\[EAcute] v "Sow" *)(*Poj\[DHacek]me na\[SHacek]e nov\[EAcute] funkce zna\[CHacek]it s mal\[YAcute]mi p\[IAcute]smeny*)
+sol = Reap[ (* "Reap" posb\[IAcute]r\[AAcute] hodnoty z\[IAcute]skan\[EAcute] v "Sow" *)
 			NDSolve[ (* \[CapitalRHacek]e\[SHacek]en\[IAcute] ODR *)
 					{
 							\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0,
@@ -70,17 +85,19 @@ NumSol = sol[[1]]
 ZeroPoints = sol[[2]]
 
 
-Plot[Evaluate[\[Theta][t] /. NumSol],{t,0,4\[Pi]}]
+
+Plot[{Evaluate[\[Theta][t] /. NumSol],10/(2*Pi),-10/(2*Pi)},{t,0,4\[Pi]},PlotLabel->"Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute], default. metoda", AxesLabel-> MaTeX/@ {t, \[Theta][t]}, 
+PlotLegends-> {MaTeX["\\text{Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute]}"],MaTeX["\\theta_{max}"]},BaseStyle->styleLaTeX,Frame->False,FrameStyle->BlackFrame, PlotStyle->{Blue, {Blue,Dashed},{Blue,Dashed}}]
 
 
 (* Vzdalenosti mezi nulovymi body jsou vsude stejne! *)
 DifsZeroPoints = Differences[ZeroPoints[[1]]]
-(* Vzdalenosti odpovidaji ctvrtine periody *)(*Polovin\[EHacek] ne? To pak vyjde i stejn\[AAcute] hodnota*)
+(* Vzdalenosti odpovidaji polovine periody *)
 TNumSol = 2*Mean[DifsZeroPoints]
 
 
-(* ::Section:: *)
-(*Numericky - jin\[EAcute] metody (\[UAcute]kol 3)*)
+(* ::Section::Closed:: *)
+(*3 Perioda numericky - jin\[EAcute] metody*)
 
 
 (*pouzijeme metodu LinearlyImplicitEuler*)
@@ -93,8 +110,14 @@ printResults = False;
 
 
 solLinearlyEuler
-Plot[{Evaluate[\[Theta][t] /. solLinearlyEuler],  Evaluate[\[Theta][t] /. NumSol], 10/(2*Pi), -10/(2*Pi)}, {t, 0, 4\[Pi]},
-	  PlotLegends->{"solLinearlyEuler, LinearlyImplicitEuler", "NumSol, Default settings"}]
+plotLE = Plot[Evaluate[\[Theta][t] /. solLinearlyEuler], {t, 0, 4\[Pi]},BaseStyle->styleLaTeX, 
+PlotStyle->Red];
+
+plotAmp = Plot[{10/(2*Pi),-10/(2*Pi)}, {t, 0, 4\[Pi]},BaseStyle->styleLaTeX, 
+PlotStyle->{{Black, Dotted}, {Black, Dotted}}];
+
+plotNumsol = Plot[Evaluate[\[Theta][t] /. NumSol], {t, 0, 4\[Pi]},BaseStyle->styleLaTeX, PlotStyle->Blue];
+Show[{plotLE, plotNumsol, plotAmp},PlotLabel->"Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute], default. metoda vs. LinearlyImplicitEuler",BaseStyle->styleLaTeX, AxesLabel->{t,\[Theta][t]}]
 
 
 (*pouzijeme metodu ImplicitRungeKutta -> vyjde stejne jako metoda whenEvent*)
@@ -107,8 +130,19 @@ nSteps = 1;
 
 printResults = False; 
 solImpRungeKutta
-Plot[{Evaluate[\[Theta][t] /. solImpRungeKutta] ,  Evaluate[\[Theta][t] /. NumSol], 10/(2*Pi), -10/(2*Pi)}, {t, 0, 4\[Pi]},
-	  PlotLegends->{"ImpRungeKutta", "NumSol, Default settings"}]
+legendsSRK = {Style["ImpRungeKutta, ImplicitRungeKutta", styleLaTeX], Style["NumSol, Default settings", styleLaTeX]};
+
+plotIRK = Plot[Evaluate[\[Theta][t] /. solImpRungeKutta], {t, 0, 4\[Pi]},BaseStyle->styleLaTeX, 
+PlotStyle->{Blue,Dashed}];
+
+plotAmp = Plot[{10/(2*Pi),-10/(2*Pi)}, {t, 0, 4\[Pi]},BaseStyle->styleLaTeX, 
+PlotStyle->{{Black, Dotted}, {Black, Dotted}}];
+
+plotNumsol = Plot[Evaluate[\[Theta][t] /. NumSol], {t, 0, 4\[Pi]},BaseStyle->styleLaTeX, PlotStyle->Green];
+Show[{plotNumsol, plotIRK,plotAmp},PlotLabel->"Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute], default. metoda vs. ImplicitRungeKutta",BaseStyle->styleLaTeX, AxesLabel->{t,\[Theta][t]}]
+
+
+
 
 
 (*pouzijeme metodu ExplicitEuler*)
@@ -119,17 +153,23 @@ solExpEuler:= NDSolve[{\[Theta]''[t] + konstg/konstl * Sin[\[Theta][t]] == 0, \[
 nSteps = 1; 
 
 
-printResults = False
+printResults = False;
 solExpEuler 
-Plot[{Evaluate[\[Theta][t] /. solExpEuler],  Evaluate[\[Theta][t] /. NumSol], 10/(2*Pi), -10/(2*Pi)}, {t, 0, 4\[Pi]},
-	  PlotLegends->{"solExpEuler, ExplicitEuler", "NumSol, Default settings"}]
+legendsIE = {Style["solExpEuler, ExplicitEuler", styleLaTeX], Style["NumSol, Default settings", styleLaTeX]};
+
+plotIE = Plot[Evaluate[\[Theta][t] /. solExpEuler], {t, 0, 4\[Pi]},BaseStyle->styleLaTeX, 
+PlotStyle->Red];
+
+plotAmp = Plot[{10/(2*Pi),-10/(2*Pi)}, {t, 0, 4\[Pi]},BaseStyle->styleLaTeX, 
+PlotStyle->{{Black, Dotted}, {Black, Dotted}}];
+
+plotNumsol = Plot[Evaluate[\[Theta][t] /. NumSol], {t, 0, 4\[Pi]},BaseStyle->styleLaTeX, PlotStyle->Blue];
+Show[{plotIE, plotNumsol, plotAmp},PlotLabel->"Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute], default. metoda vs. ExplicitEuler",BaseStyle->styleLaTeX, AxesLabel->{t,\[Theta][t]}]
 
 
 
-
-
-(* ::Section:: *)
-(*Z\[AAcute]kon zachov\[AAcute]n\[IAcute] energie a numerick\[EAcute] metody (\[UAcute]kol 4)*)
+(* ::Section::Closed:: *)
+(*4 Z\[AAcute]kon zachov\[AAcute]n\[IAcute] energie a numerick\[EAcute] metody*)
 
 
 (*ClearAll["Global'*"]*)
@@ -140,21 +180,16 @@ mtd ="ExplicitEuler";
 
 (*Metoda navr\[ZHacek]en\[AAcute] Mathematicou*)
 goodSolution = NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][t],\[Omega][0]==\[Omega]0,\[Theta][0]==0 },{\[Theta][t], \[Omega][t]},{t,0,tMax}];
-goodPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. goodSolution], {t, 0 ,tMax}, PlotStyle->{Blue,Dashed}];
+goodPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. goodSolution], {t, 0 ,tMax}, BaseStyle->styleLaTeX, PlotStyle->{Blue,Dashed}];
 (*Vl\[AAcute]stn\[IAcute] volba metody*)
 badSolution =NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][t],\[Omega][0]==\[Omega]0,\[Theta][0]==0 },{\[Theta][t], \[Omega][t]},{t,0,tMax},StartingStepSize->h,Method->{"TimeIntegration"->mtd}];
-badPlot =ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. badSolution], {t, 0 ,tMax}, PlotStyle->Red];
+badPlot =ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. badSolution], {t, 0 ,tMax}, BaseStyle->styleLaTeX, PlotStyle->Red];
 (*Porovn\[AAcute]n\[IAcute] v\[YAcute]voje energie*)
-goodEnergyPlot = Plot[Evaluate[0.5*\[Omega][t]^2-Cos[\[Theta][t]]]/. goodSolution, {t, 0 ,tMax},PlotStyle->{Blue,Dashed}, PlotRange-> {{0,tMax},{0,1}}];
-badEnergyPlot =Plot[Evaluate[0.5*\[Omega][t]^2-Cos[\[Theta][t]]]/. badSolution, {t, 0 ,tMax}, PlotStyle->Red, PlotRange-> {{0,tMax},{0.5*\[Omega]0^2-1-0.5,0.5*\[Omega]0^2-1+0.5}}];
+goodEnergyPlot = Plot[Evaluate[0.5*\[Omega][t]^2-Cos[\[Theta][t]]]/. goodSolution, {t, 0 ,tMax}, BaseStyle->styleLaTeX,PlotStyle->{Blue,Dashed}, PlotRange-> {{0,tMax},{0,1}}];
+badEnergyPlot =Plot[Evaluate[0.5*\[Omega][t]^2-Cos[\[Theta][t]]]/. badSolution, {t, 0 ,tMax}, BaseStyle->styleLaTeX, PlotStyle->Red, PlotRange-> {{0,tMax},{0.5*\[Omega]0^2-1-0.5,0.5*\[Omega]0^2-1+0.5}}];
 
 GraphicsRow[{Show[{badEnergyPlot,goodEnergyPlot},PlotLabel->"Celkov\[AAcute] energie syst\[EAcute]mu",AxesLabel->{t,"E"}],Show[{badPlot,goodPlot},PlotLabel->"F\[AAcute]zov\[YAcute] prostor",AxesLabel->{\[Theta],\[Omega]}]}]
 
-
-
-
-(* ::InheritFromParent:: *)
-(**)
 
 
 (* ::InheritFromParent:: *)
@@ -170,10 +205,10 @@ goodSolution = NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][
 projSolution =NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][t],\[Omega][0]==\[Omega]0,\[Theta][0]==0 },{\[Theta][t], \[Omega][t]},{t,0,tMax},StartingStepSize->h,
 						Method->{"Projection",Method->mtd, "Invariants"->{0.5*\[Omega][t]^2-Cos[\[Theta][t]]}}];
 (*Porovn\[AAcute]n\[IAcute] v\[YAcute]voj\[URing] v \[CHacek]ase*)					
-projPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. projSolution], {t, 0 ,tMax}, PlotStyle->{Darker[Green],Dashed},PlotLabel->"F\[AAcute]zov\[YAcute] prostor s projek\[CHacek]n\[IAcute] metodou",AxesLabel->{\[Theta],\[Omega]}];
-goodPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. goodSolution], {t, 0 ,tMax}, PlotStyle->{Blue,Dashed}];
-goodTimePlot= Plot[Evaluate[{\[Theta][t]} /. goodSolution], {t, 0 ,tMax}, PlotStyle->{Blue},PlotLabel->"V\[YAcute]chylka kyvadla v \[CHacek]ase",AxesLabel->{t,TraditionalForm[HoldForm[\[Theta][t]]]}];
-projTimePlot= Plot[Evaluate[{\[Theta][t]} /. projSolution], {t, 0 ,tMax}, PlotStyle->{Darker[Green]}];
+projPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. projSolution], {t, 0 ,tMax}, BaseStyle->styleLaTeX, PlotStyle->{Darker[Green],Dashed},PlotLabel->"F\[AAcute]zov\[YAcute] prostor s projek\[CHacek]n\[IAcute] metodou",AxesLabel->{\[Theta],\[Omega]}];
+goodPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. goodSolution], {t, 0 ,tMax}, BaseStyle->styleLaTeX, PlotStyle->{Blue,Dashed}];
+goodTimePlot= Plot[Evaluate[{\[Theta][t]} /. goodSolution], {t, 0 ,tMax}, BaseStyle->styleLaTeX, PlotStyle->{Blue},PlotLabel->"V\[YAcute]chylka kyvadla v \[CHacek]ase",AxesLabel->{t,TraditionalForm[HoldForm[\[Theta][t]]]}];
+projTimePlot= Plot[Evaluate[{\[Theta][t]} /. projSolution], {t, 0 ,tMax}, BaseStyle->styleLaTeX, PlotStyle->{Darker[Green]}];
 
 phasePlot = Show[{projPlot,goodPlot}];
 thetaPlot =Show[{goodTimePlot,projTimePlot}];
@@ -204,15 +239,15 @@ h=0.01;
 
 SPRKSolution = NDSolve[{\[Omega]'[t]== -Sin[\[Theta][t]],\[Theta]'[t]==\[Omega][t],\[Omega][0]==\[Omega]0,\[Theta][0]==0 },{\[Theta][t], \[Omega][t]},{t,0,tMax}, 
 					Method -> {"SymplecticPartitionedRungeKutta", "DifferenceOrder" -> 8,"PositionVariables" -> {\[Theta][t]}},  StartingStepSize -> h];
-SPRKPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. SPRKSolution], {t, 0 ,tMax}, PlotStyle->{Brown,Dashed}]
+SPRKPlot = ParametricPlot[Evaluate[{\[Theta][t], \[Omega][t]} /. SPRKSolution], {t, 0 ,tMax}, BaseStyle->styleLaTeX, PlotStyle->{Brown,Dashed}]
 
-SPRKTimePlot= Plot[Evaluate[{\[Theta][t]} /. projSolution], {t, 0 ,tMax}, PlotStyle->{Brown}];
+SPRKTimePlot= Plot[Evaluate[{\[Theta][t]} /. projSolution], {t, 0 ,tMax}, PlotStyle->{Brown}, BaseStyle->styleLaTeX];
 Show[{goodTimePlot,SPRKTimePlot}]
      
 
 
-(* ::Section:: *)
-(*Porovn\[AAcute]n\[IAcute] analytick\[EAcute] aproximace a numerick\[EAcute]ho \[RHacek]e\[SHacek]en\[IAcute] (\[UAcute]kol 5)*)
+(* ::Section::Closed:: *)
+(*5 Porovn\[AAcute]n\[IAcute] analytick\[EAcute] aproximace a numerick\[EAcute]ho \[RHacek]e\[SHacek]en\[IAcute]*)
 
 
 \[Omega]nula=Sqrt[konstg/konstl];
@@ -220,17 +255,13 @@ Show[{goodTimePlot,SPRKTimePlot}]
 solPoincareLindstedt=konst\[Theta]init*Cos[\[Omega]PL*t]+konst\[Theta]init^3/192*(Cos[3*\[Omega]PL*t]-Cos[\[Omega]PL*t]);
 
 
-Plot[{solPoincareLindstedt,Evaluate[\[Theta][t] /. NumSol]},{t,0,4\[Pi]}]
+Plot[{solPoincareLindstedt,Evaluate[\[Theta][t] /. NumSol], 10/(2*Pi),-10/(2*Pi)},{t,0,4\[Pi]},BaseStyle->styleLaTeX, 
+PlotStyle->{Red,Blue, {Black, Dotted},{Black,Dotted}}, PlotLabel->"Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute] vs. Poincar\[EAcute]-Lindstedt", 
+PlotLegends->{MaTeX /@ solPoincareLindstedt,  MaTeX["\\text{Numerick\[EAcute] \[RHacek].,default}"],MaTeX["\\theta_{max}"]   }]
 
 
-TseriesAprox /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1   (*Analytick\[AAcute] aproximace*)
-TIntegralExplicit /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1 (*P\[RHacek]es eliptick\[YAcute] integr\[AAcute]l*)
-TNumSol (*Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute]*)
-TPoincareLindstedt=2\[Pi]/\[Omega]PL  (*Aproximace Poincar\[EAcute]-Lindstedt*)
-
-
-(* ::Section:: *)
-(*Dal\[SHacek]\[IAcute] \[CHacek]len v rozvoji (\[UAcute]kol 6)*)
+(* ::Section::Closed:: *)
+(*6.1 Dal\[SHacek]\[IAcute] \[CHacek]len v rozvoji*)
 
 
 \[Theta]series[t_] := \[Epsilon]*\[Theta]A[t] + \[Epsilon]^3*\[Theta]B[t] + \[Epsilon]^5*\[Theta]C[t] (* Potrebujeme nejvyssi clen eps^5 *)
@@ -278,8 +309,8 @@ RowBox[{"i", "n", "i", "t"}], "TI"], "4"]
 thetaCsol /. \[Beta] -> -5/512 *\[Theta]tI^4 *\[Omega]2 /. Sqrt[\[Omega]2] -> \[Omega] /. 1/Sqrt[\[Omega]2] -> 1/\[Omega] /. \[Theta]tI -> HoldForm[\!\(TraditionalForm\`SubscriptBox[OverscriptBox["\<\[Theta]\>", "\<~\>"], StyleBox[RowBox[{"\<i\>", "\<n\>", "\<i\>", "\<t\>"}], "\<TI\>"]]\)]
 
 
-(* ::Section:: *)
-(*Marn\[EAcute] pokusy o \[RHacek]e\[SHacek]en\[IAcute] 6. \[UAcute]kolu p\[RHacek]es mathematicu*)
+(* ::Section::Closed:: *)
+(*6.2 Dodatek*)
 
 
 sol61 = DSolve[{koef[[2]]==0,
@@ -316,3 +347,23 @@ sol = DSolve[
 
 
 \[Theta]B[t] /. sol /. \[Alpha] -> - \[Omega]2*\[Theta]tI^2 /8
+
+
+(* ::Section::Closed:: *)
+(*7 Shrnut\[IAcute] v\[YAcute]sledk\[URing]*)
+
+
+MaTeX["\\text{1) Analytick\[AAcute] aproximace:}"]
+MaTeX["T_{analytic}"]== TseriesAprox /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1 //TraditionalForm
+
+MaTeX["\\text{2) P\[RHacek]es eliptick\[YAcute] integr\[AAcute]l:}"] 
+MaTeX["T_{elliptic}"]==TIntegralExplicit /. \[Theta]init->10/(2\[Pi]) /. g->9.81 /. l->1 //TraditionalForm 
+
+MaTeX["\\text{3) Numerick\[EAcute] \[RHacek]e\[SHacek]en\[IAcute]:}"]
+MaTeX["T_{numeric}"]==TNumSol //TraditionalForm 
+
+MaTeX["\\text{4) Aproximace Poincar\[EAcute]-Lindstedt:}"]
+MaTeX["T_{PL}"]== 2\[Pi]/\[Omega]PL  //TraditionalForm 
+
+
+
